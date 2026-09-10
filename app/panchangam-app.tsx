@@ -431,12 +431,12 @@ export function PanchangamApp() {
       <header className="border-b border-[#e6cfa8] bg-[#fffaf0]/90 backdrop-blur">
         <div className="mx-auto flex max-w-[1480px] items-center justify-between px-5 py-4 lg:px-9">
           <div className="flex items-center gap-3">
-            <div className="grid size-11 place-items-center rounded-full bg-[#741b20] text-2xl font-bold text-[#ffd58b] shadow-sm">
-              ௐ
+            <div className="grid size-11 place-items-center rounded-full text-2xl">
+              <img src="/cuddalore.png" alt="Logo" width={100} height={100} />
             </div>
             <div>
               <p className="font-display text-xl font-bold text-[#741b20]">{t.brand}</p>
-              <p className="text-xs font-medium tracking-wide text-[#8e6f5a]">PROKERALA API</p>
+              <p className="text-xs font-medium tracking-wide text-[#8e6f5a]">Cuddalore District</p>
             </div>
           </div>
           <div className="flex items-center gap-1 rounded-full border border-[#e6cfa8] bg-white p-1" aria-label={t.language}>
@@ -585,7 +585,8 @@ export function PanchangamApp() {
                 <div className="pointer-events-none absolute inset-5 rounded-[20px] border border-[#eddaa9]" />
                 <div className="relative">
                   <div className="flex flex-col items-center text-center">
-                    <span className="mb-1 text-4xl font-bold text-[#dc7c19]">ௐ</span>
+                    <img src="/cuddalore.png" alt="Logo" width={100} height={100} />
+                    {/* <span className="mb-1 text-4xl font-bold text-[#dc7c19]">ௐ</span> */}
                     <h2 className="font-display text-3xl font-extrabold text-[#741b20] sm:text-4xl">{t.title}</h2>
                     <p className="mt-3 text-base font-semibold text-[#68443b] sm:text-lg">{displayDate(data.date, language)}</p>
                     <p className="mt-1 flex items-center gap-1.5 text-sm text-[#8e6f5a]">
