@@ -16,21 +16,21 @@ const demo = {
     weekday: "வியாழக்கிழமை",
     tamilMonth: "ஆவணி",
     tithi: [
-      { name: "சதுர்த்தசி", start: "12:31 PM", end: "10:33 AM" },
-      { name: "அமாவாசை", start: "10:33 AM", end: "08:57 AM" },
+      { name: "சதுர்த்தசி", start: "நேற்று 12:31 PM", end: "10:33 AM" },
+      { name: "அமாவாசை", start: "10:33 AM", end: "நாளை 08:57 AM" },
     ],
     nakshatra: [
-      { name: "மகம்", start: "03:14 PM", end: "02:04 PM" },
-      { name: "பூரம்", start: "02:04 PM", end: "01:16 PM" },
+      { name: "மகம்", start: "நேற்று 03:14 PM", end: "02:04 PM" },
+      { name: "பூரம்", start: "02:04 PM", end: "நாளை 01:16 PM" },
     ],
     yoga: [
-      { name: "சித்தம்", start: "09:51 PM", end: "07:17 PM" },
-      { name: "சாத்தியம்", start: "07:17 PM", end: "05:01 PM" },
+      { name: "சித்தம்", start: "நேற்று 09:51 PM", end: "07:17 PM" },
+      { name: "சாத்தியம்", start: "07:17 PM", end: "நாளை 05:01 PM" },
     ],
     karana: [
-      { name: "சகுனி", start: "11:30 PM", end: "10:33 AM" },
+      { name: "சகுனி", start: "நேற்று 11:30 PM", end: "10:33 AM" },
       { name: "சதுஷ்பாதம்", start: "10:33 AM", end: "09:42 PM" },
-      { name: "நாகம்", start: "09:42 PM", end: "08:57 AM" },
+      { name: "நாகம்", start: "09:42 PM", end: "நாளை 08:57 AM" },
     ],
     paksha: "கிருஷ்ண பட்சம்",
     rashi: "—",
@@ -56,21 +56,21 @@ const demo = {
     weekday: "Thursday",
     tamilMonth: "Avani",
     tithi: [
-      { name: "Chaturdashi", start: "12:31 PM", end: "10:33 AM" },
-      { name: "Amavasya", start: "10:33 AM", end: "08:57 AM" },
+      { name: "Chaturdashi", start: "Yesterday 12:31 PM", end: "10:33 AM" },
+      { name: "Amavasya", start: "10:33 AM", end: "Tomorrow 08:57 AM" },
     ],
     nakshatra: [
-      { name: "Magha", start: "03:14 PM", end: "02:04 PM" },
-      { name: "Purva Phalguni", start: "02:04 PM", end: "01:16 PM" },
+      { name: "Magha", start: "Yesterday 03:14 PM", end: "02:04 PM" },
+      { name: "Purva Phalguni", start: "02:04 PM", end: "Tomorrow 01:16 PM" },
     ],
     yoga: [
-      { name: "Siddha", start: "09:51 PM", end: "07:17 PM" },
-      { name: "Sadhya", start: "07:17 PM", end: "05:01 PM" },
+      { name: "Siddha", start: "Yesterday 09:51 PM", end: "07:17 PM" },
+      { name: "Sadhya", start: "07:17 PM", end: "Tomorrow 05:01 PM" },
     ],
     karana: [
-      { name: "Shakuni", start: "11:30 PM", end: "10:33 AM" },
+      { name: "Shakuni", start: "Yesterday 11:30 PM", end: "10:33 AM" },
       { name: "Chatushpada", start: "10:33 AM", end: "09:42 PM" },
-      { name: "Naga", start: "09:42 PM", end: "08:57 AM" },
+      { name: "Naga", start: "09:42 PM", end: "Tomorrow 08:57 AM" },
     ],
     paksha: "Krishna Paksha",
     rashi: "—",
@@ -114,15 +114,46 @@ function nameOf(value: unknown): string {
   return String(item.name ?? item.value ?? item.title ?? "—");
 }
 
-function timeOf(value: unknown): string {
+function dayPartTime(hour: number, minute: string, language: Language): string {
+  const clock = `${String(hour % 12 || 12).padStart(2, "0")}:${minute}`;
+  const dayPart = language === "ta"
+    ? (hour >= 12 ? "மாலை" : "காலை")
+    : (hour >= 12 ? "Evening" : "Morning");
+  return `${dayPart} ${clock}`;
+}
+
+function timeOf(value: unknown, selectedDate?: string, language: Language = "en"): string {
   if (typeof value !== "string") return "—";
   const match = value.match(/T(\d{2}):(\d{2})/);
   if (!match) return value;
   const hour = Number(match[1]);
-  return `${String(hour % 12 || 12).padStart(2, "0")}:${match[2]} ${hour >= 12 ? "PM" : "AM"}`;
+  const time = dayPartTime(hour, match[2], language);
+  const timestampDate = value.match(/^(\d{4}-\d{2}-\d{2})T/)?.[1];
+
+  if (!selectedDate || !timestampDate || timestampDate === selectedDate) return time;
+  if (timestampDate < selectedDate) return `${language === "ta" ? "நேற்று" : "Yesterday"} ${time}`;
+  return `${language === "ta" ? "நாளை" : "Tomorrow"} ${time}`;
 }
 
-function timedItems(value: unknown): TimedItem[] {
+function demoFor(language: Language): AnyObject {
+  const replaceTime = (value: unknown): unknown => {
+    if (typeof value === "string") {
+      return value.replace(/(\d{2}):(\d{2}) (AM|PM)/g, (_, hours: string, minutes: string, meridiem: string) => {
+        const hour = (Number(hours) % 12) + (meridiem === "PM" ? 12 : 0);
+        return dayPartTime(hour, minutes, language);
+      });
+    }
+    if (Array.isArray(value)) return value.map(replaceTime);
+    if (value && typeof value === "object") {
+      return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, replaceTime(item)]));
+    }
+    return value;
+  };
+
+  return object(replaceTime(demo[language]));
+}
+
+function timedItems(value: unknown, selectedDate: string, language: Language): TimedItem[] {
   const entries = Array.isArray(value) ? value : value ? [value] : [];
 
   return entries.flatMap((entry) => {
@@ -133,8 +164,8 @@ function timedItems(value: unknown): TimedItem[] {
       const interval = object(period);
       return {
         name: nameOf(item),
-        start: timeOf(interval.start ?? interval.start_time ?? interval.from),
-        end: timeOf(interval.end ?? interval.end_time ?? interval.to),
+        start: timeOf(interval.start ?? interval.start_time ?? interval.from, selectedDate, language),
+        end: timeOf(interval.end ?? interval.end_time ?? interval.to, selectedDate, language),
       };
     });
   });
@@ -173,7 +204,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const token = await accessToken();
-    if (!token) return NextResponse.json({ date, location, source: "demo", ...demo[language] });
+    if (!token) return NextResponse.json({ date, location, source: "demo", ...demoFor(language) });
 
     const params = new URLSearchParams({
       ayanamsa: "1",
@@ -197,20 +228,20 @@ export async function GET(request: NextRequest) {
       source: "live",
       weekday: nameOf(at(data, ["weekday", "vaara"])),
       tamilMonth: nameOf(at(data, ["lunar_month", "month", "masa"])),
-      tithi: timedItems(tithiValue),
-      nakshatra: timedItems(at(data, ["nakshatra", "nakshatras"])),
-      yoga: timedItems(at(data, ["yoga", "yogas"])),
-      karana: timedItems(at(data, ["karana", "karanas"])),
+      tithi: timedItems(tithiValue, date, language),
+      nakshatra: timedItems(at(data, ["nakshatra", "nakshatras"]), date, language),
+      yoga: timedItems(at(data, ["yoga", "yogas"]), date, language),
+      karana: timedItems(at(data, ["karana", "karanas"]), date, language),
       paksha: directPaksha !== "—"
         ? directPaksha
         : nameOf(object(Array.isArray(tithiValue) ? tithiValue[0] : tithiValue).paksha),
       rashi: nameOf(at(data, ["raasi", "rashi", "moon_sign"])),
-      sunrise: timeOf(at(data, ["sunrise"])),
-      sunset: timeOf(at(data, ["sunset"])),
-      moonrise: timeOf(at(data, ["moonrise"])),
-      moonset: timeOf(at(data, ["moonset"])),
-      auspiciousPeriods: timedItems(at(data, ["auspicious_period"])),
-      inauspiciousPeriods: timedItems(at(data, ["inauspicious_period"])),
+      sunrise: timeOf(at(data, ["sunrise"]), date, language),
+      sunset: timeOf(at(data, ["sunset"]), date, language),
+      moonrise: timeOf(at(data, ["moonrise"]), date, language),
+      moonset: timeOf(at(data, ["moonset"]), date, language),
+      auspiciousPeriods: timedItems(at(data, ["auspicious_period"]), date, language),
+      inauspiciousPeriods: timedItems(at(data, ["inauspicious_period"]), date, language),
     });
   } catch (error) {
     console.error("Panchang API error", error);
