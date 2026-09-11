@@ -95,7 +95,7 @@ const demo = {
 };
 
 function object(value: unknown): AnyObject {
-  return value && typeof value === "object" ? value as AnyObject : {};
+  return value && typeof value === "object" ? (value as AnyObject) : {};
 }
 
 function at(source: AnyObject, paths: string[]): unknown {
@@ -116,9 +116,19 @@ function nameOf(value: unknown): string {
 
 function dayPartTime(hour: number, minute: string, language: Language): string {
   const clock = `${String(hour % 12 || 12).padStart(2, "0")}:${minute}`;
-  const dayPart = language === "ta"
-    ? (hour >= 12 ? "மாலை" : "காலை")
-    : (hour >= 12 ? "Evening" : "Morning");
+
+  let dayPart: string;
+
+  if (hour >= 5 && hour < 12) {
+    dayPart = language === "ta" ? "காலை" : "Morning";
+  } else if (hour >= 12 && hour < 15) {
+    dayPart = language === "ta" ? "மதியம்" : "Afternoon";
+  } else if (hour >= 15 && hour < 21) {
+    dayPart = language === "ta" ? "மாலை" : "Evening";
+  } else {
+    dayPart = language === "ta" ? "இரவு" : "Night";
+  }
+
   return `${dayPart} ${clock}`;
 }
 
@@ -198,7 +208,13 @@ export async function GET(request: NextRequest) {
   const language: Language = search.get("language") === "en" ? "en" : "ta";
   const location = search.get("location") ?? (language === "ta" ? "கடலூர்" : "Cuddalore");
 
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) {
+  if (
+    !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
+    !Number.isFinite(lat) ||
+    !Number.isFinite(lng) ||
+    Math.abs(lat) > 90 ||
+    Math.abs(lng) > 180
+  ) {
     return NextResponse.json({ message: "Invalid date or coordinates" }, { status: 400 });
   }
 
@@ -232,9 +248,7 @@ export async function GET(request: NextRequest) {
       nakshatra: timedItems(at(data, ["nakshatra", "nakshatras"]), date, language),
       yoga: timedItems(at(data, ["yoga", "yogas"]), date, language),
       karana: timedItems(at(data, ["karana", "karanas"]), date, language),
-      paksha: directPaksha !== "—"
-        ? directPaksha
-        : nameOf(object(Array.isArray(tithiValue) ? tithiValue[0] : tithiValue).paksha),
+      paksha: directPaksha !== "—" ? directPaksha : nameOf(object(Array.isArray(tithiValue) ? tithiValue[0] : tithiValue).paksha),
       rashi: nameOf(at(data, ["raasi", "rashi", "moon_sign"])),
       sunrise: timeOf(at(data, ["sunrise"]), date, language),
       sunset: timeOf(at(data, ["sunset"]), date, language),

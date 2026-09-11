@@ -292,6 +292,257 @@ export function PanchangamApp() {
     });
 
     const canvas = document.createElement("canvas");
+    canvas.width = 1080;
+    canvas.height = 1920;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    ctx.direction = "ltr";
+    ctx.textBaseline = "alphabetic";
+
+    const drawCenteredText = (text: string, centerX: number, y: number) => {
+      ctx.textAlign = "left";
+      ctx.direction = "ltr";
+
+      const width = ctx.measureText(text).width;
+      ctx.fillText(text, centerX - width / 2, y);
+    };
+
+    const cream = "#fff9eb";
+    const maroon = "#741b20";
+    const saffron = "#dc7c19";
+    const muted = "#6f574c";
+    const panel = "#f7e9cd";
+    const border = "#e3c28b";
+    const blue = "#0143B9";
+
+    ctx.fillStyle = cream;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.strokeStyle = saffron;
+    ctx.lineWidth = 10;
+    ctx.strokeRect(24, 24, 1032, canvas.height - 48);
+
+    ctx.lineWidth = 2;
+    ctx.strokeRect(42, 42, 996, canvas.height - 84);
+
+    const logo = await loadPosterImage("/cuddalore.png").catch(() => null);
+
+    if (logo) {
+      ctx.drawImage(logo, 430, 50, 220, 220);
+    } else {
+      ctx.fillStyle = saffron;
+      ctx.font = "700 76px 'Noto Sans Tamil', Latha, Arial";
+      drawCenteredText("ௐ", 540, 170);
+    }
+
+    // Header
+    ctx.fillStyle = maroon;
+    ctx.font = "700 42px 'Noto Sans Tamil', Latha, Arial";
+    drawCenteredText(t.title, 540, 320);
+
+    ctx.font = "600 27px 'Noto Sans Tamil', Latha, Arial";
+    drawCenteredText(displayDate(data.date, language), 540, 363);
+
+    ctx.fillStyle = muted;
+    ctx.font = "500 24px 'Noto Sans Tamil', Latha, Arial";
+    drawCenteredText(data.location, 540, 400);
+
+    ctx.strokeStyle = border;
+    ctx.beginPath();
+    ctx.moveTo(72, 426);
+    ctx.lineTo(1008, 426);
+    ctx.stroke();
+
+    // Top 4 time cards
+    const solarItems = [
+      [t.sunrise, data.sunrise],
+      [t.sunset, data.sunset],
+      [t.moonrise, data.moonrise],
+      [t.moonset, data.moonset],
+    ];
+
+    solarItems.forEach(([label, value], index) => {
+      const x = 72 + index * 237;
+      const centerX = x + 109.5;
+
+      ctx.fillStyle = panel;
+      ctx.fillRect(x, 452, 219, 96);
+
+      ctx.fillStyle = saffron;
+      ctx.font = "600 18px 'Noto Sans Tamil', Latha, Arial";
+      drawCenteredText(label, centerX, 484);
+
+      ctx.fillStyle = maroon;
+      ctx.font = "700 26px 'Noto Sans Tamil', Latha, Arial";
+      drawCenteredText(value, centerX, 522);
+    });
+
+    const drawSection = (x: number, y: number, width: number, title: string, items: TimedItem[]) => {
+      const safeItems = items.length ? items : [{ name: "—", start: "", end: "" }];
+
+      const itemHeight = 59;
+      const height = 49 + safeItems.length * itemHeight + 10;
+
+      ctx.fillStyle = "#fffdf7";
+      ctx.fillRect(x, y, width, height);
+
+      ctx.strokeStyle = border;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x, y, width, height);
+
+      ctx.fillStyle = maroon;
+      ctx.fillRect(x, y, width, 49);
+
+      ctx.textAlign = "left";
+      ctx.fillStyle = "#fff5dc";
+      ctx.font = "700 21px 'Noto Sans Tamil', Latha, Arial";
+      ctx.fillText(title, x + 18, y + 32);
+
+      safeItems.forEach((item, index) => {
+        const itemY = y + 49 + index * itemHeight;
+
+        if (index > 0) {
+          ctx.strokeStyle = "#efe1c9";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(x + 16, itemY);
+          ctx.lineTo(x + width - 16, itemY);
+          ctx.stroke();
+        }
+
+        ctx.fillStyle = maroon;
+        ctx.font = "700 20px 'Noto Sans Tamil', Latha, Arial";
+        ctx.fillText(item.name, x + 18, itemY + 24);
+
+        if (item.start || item.end) {
+          ctx.fillStyle = muted;
+          ctx.font = "600 18px 'Noto Sans Tamil', Latha, Arial";
+          ctx.fillText(rangeText(item), x + 18, itemY + 48);
+        }
+      });
+
+      return y + height + 13;
+    };
+
+    const plainItem = (value: string): TimedItem[] => [
+      {
+        name: value,
+        start: "",
+        end: "",
+      },
+    ];
+
+    const leftX = 72;
+    const rightX = 552;
+    const columnWidth = 456;
+
+    let leftY = 576;
+    let rightY = 576;
+
+    leftY = drawSection(leftX, leftY, columnWidth, t.tithi, data.tithi);
+    leftY = drawSection(leftX, leftY, columnWidth, t.star, data.nakshatra);
+    leftY = drawSection(leftX, leftY, columnWidth, t.yoga, data.yoga);
+    leftY = drawSection(leftX, leftY, columnWidth, t.karana, data.karana);
+    leftY = drawSection(leftX, leftY, columnWidth, t.paksha, plainItem(data.paksha));
+    drawSection(leftX, leftY, columnWidth, t.rashi, plainItem(data.rashi));
+
+    rightY = drawSection(rightX, rightY, columnWidth, t.auspicious, data.auspiciousPeriods);
+    drawSection(rightX, rightY, columnWidth, t.inauspicious, data.inauspiciousPeriods);
+
+    // Footer
+    ctx.fillStyle = saffron;
+    ctx.font = "600 24px 'Noto Sans Tamil', Latha, Arial";
+    drawCenteredText("சண்முக ஹரிதாசன்", 540, 1770);
+
+    ctx.fillStyle = blue;
+    ctx.font = "600 18px 'Noto Sans Tamil', Latha, Arial";
+    drawCenteredText("கடலூர் மாவட்ட செயலாளர், விசுவ ஹிந்து பரிஷத்", 540, 1805);
+
+    ctx.fillStyle = saffron;
+    ctx.font = "600 26px 'Noto Sans Tamil', Latha, Arial";
+    drawCenteredText(`• ${t.footer} •`, 540, 1850);
+
+    /*
+     * -------------------------------------------------
+     * iPhone / Safari compatible image saving
+     * -------------------------------------------------
+     */
+    const fileName = `panchangam-${data.date}.png`;
+
+    canvas.toBlob(
+      async (blob) => {
+        if (!blob) {
+          console.error("Unable to create poster image.");
+          return;
+        }
+
+        const file = new File([blob], fileName, {
+          type: "image/png",
+        });
+
+        try {
+          if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              files: [file],
+              title: "Daily Panchangam",
+            });
+
+            setDownloaded(true);
+            window.setTimeout(() => {
+              setDownloaded(false);
+            }, 1800);
+
+            return;
+          }
+        } catch (error: any) {
+          if (error?.name === "AbortError") {
+            return;
+          }
+
+          console.warn("iOS share failed. Using normal download.", error);
+        }
+
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+
+        link.href = url;
+        link.download = fileName;
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        window.setTimeout(() => {
+          URL.revokeObjectURL(url);
+        }, 5000);
+
+        setDownloaded(true);
+        window.setTimeout(() => {
+          setDownloaded(false);
+        }, 1800);
+      },
+      "image/png",
+      1,
+    );
+  };
+
+  /* const downloadPoster = async () => {
+    if (!data) return;
+
+    // Wait until fonts are fully loaded.
+    // Important for iPhone/Safari text rendering.
+    await document.fonts.ready;
+
+    // Give iOS Safari one extra render cycle.
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => resolve());
+      });
+    });
+
+    const canvas = document.createElement("canvas");
 
     canvas.width = 1080;
     canvas.height = 1920;
@@ -299,6 +550,15 @@ export function PanchangamApp() {
     const ctx = canvas.getContext("2d");
 
     if (!ctx) return;
+
+    const drawCenteredText = (text: string, centerX: number, y: number) => {
+      ctx.textAlign = "left";
+      ctx.direction = "ltr";
+
+      const width = ctx.measureText(text).width;
+
+      ctx.fillText(text, centerX - width / 2, y);
+    };
 
     const cream = "#fff9eb";
     const maroon = "#741b20";
@@ -327,19 +587,19 @@ export function PanchangamApp() {
     } else {
       ctx.fillStyle = saffron;
       ctx.font = "700 76px 'Noto Sans Tamil', Latha, Arial";
-      ctx.fillText("ௐ", 540, 170);
+      drawCenteredText("ௐ", 540, 170);
     }
 
     ctx.fillStyle = maroon;
-    ctx.font = "700 48px 'Noto Sans Tamil', Latha, Arial";
-    ctx.fillText(t.title, 540, 320);
+    ctx.font = "700 42px 'Noto Sans Tamil', Latha, Arial";
+    drawCenteredText(t.title, 540, 320);
 
-    ctx.font = "600 25px 'Noto Sans Tamil', Latha, Arial";
-    ctx.fillText(displayDate(data.date, language), 540, 363);
+    ctx.font = "600 27px 'Noto Sans Tamil', Latha, Arial";
+    drawCenteredText(displayDate(data.date, language), 540, 363);
 
     ctx.fillStyle = muted;
-    ctx.font = "500 22px 'Noto Sans Tamil', Latha, Arial";
-    ctx.fillText(data.location, 540, 400);
+    ctx.font = "500 24px 'Noto Sans Tamil', Latha, Arial";
+    drawCenteredText(data.location, 540, 400);
 
     ctx.strokeStyle = border;
     ctx.beginPath();
@@ -362,18 +622,18 @@ export function PanchangamApp() {
 
       ctx.textAlign = "center";
       ctx.fillStyle = saffron;
-      ctx.font = "600 17px 'Noto Sans Tamil', Latha, Arial";
-      ctx.fillText(label, x + 109.5, 484);
+      ctx.font = "600 18px 'Noto Sans Tamil', Latha, Arial";
+      drawCenteredText(label, x + 109.5, 484);
 
       ctx.fillStyle = maroon;
-      ctx.font = "700 22px 'Noto Sans Tamil', Latha, Arial";
-      ctx.fillText(value, x + 109.5, 522);
+      ctx.font = "700 26px 'Noto Sans Tamil', Latha, Arial";
+      drawCenteredText(value, x + 109.5, 522);
     });
 
     const drawSection = (x: number, y: number, width: number, title: string, items: TimedItem[]) => {
       const safeItems = items.length ? items : [{ name: "—", start: "", end: "" }];
 
-      const itemHeight = 55;
+      const itemHeight = 59;
       const height = 49 + safeItems.length * itemHeight + 10;
 
       ctx.fillStyle = "#fffdf7";
@@ -405,13 +665,13 @@ export function PanchangamApp() {
         }
 
         ctx.fillStyle = maroon;
-        ctx.font = "700 19px 'Noto Sans Tamil', Latha, Arial";
-        ctx.fillText(item.name, x + 18, itemY + 23);
+        ctx.font = "700 20px 'Noto Sans Tamil', Latha, Arial";
+        ctx.fillText(item.name, x + 18, itemY + 24);
 
         if (item.start || item.end) {
           ctx.fillStyle = muted;
-          ctx.font = "600 16px 'Noto Sans Tamil', Latha, Arial";
-          ctx.fillText(rangeText(item), x + 18, itemY + 45);
+          ctx.font = "600 18px 'Noto Sans Tamil', Latha, Arial";
+          ctx.fillText(rangeText(item), x + 18, itemY + 48);
         }
       });
 
@@ -453,21 +713,15 @@ export function PanchangamApp() {
 
     ctx.fillStyle = saffron;
     ctx.font = "600 24px 'Noto Sans Tamil', Latha, Arial";
-    ctx.fillText("சண்முக ஹரிதாசன்", 540, 1770);
+    drawCenteredText("சண்முக ஹரிதாசன்", 540, 1770);
 
     ctx.fillStyle = blue;
     ctx.font = "600 18px 'Noto Sans Tamil', Latha, Arial";
-    ctx.fillText("கடலூர் மாவட்ட செயலாளர், விசுவ ஹிந்து பரிஷத்", 540, 1805);
+    drawCenteredText("கடலூர் மாவட்ட செயலாளர், விசுவ ஹிந்து பரிஷத்", 540, 1805);
 
     ctx.fillStyle = saffron;
     ctx.font = "600 26px 'Noto Sans Tamil', Latha, Arial";
-    ctx.fillText(`• ${t.footer} •`, 540, 1850);
-
-    /*
-     * -------------------------------------------------
-     * iPhone / Safari compatible image saving
-     * -------------------------------------------------
-     */
+    drawCenteredText(`• ${t.footer} •`, 540, 1850);    
 
     const fileName = `panchangam-${data.date}.png`;
 
@@ -481,16 +735,7 @@ export function PanchangamApp() {
         const file = new File([blob], fileName, {
           type: "image/png",
         });
-
-        /*
-         * iPhone / iPad
-         *
-         * Safari does not reliably support <a download>
-         * for dynamically generated canvas images.
-         *
-         * Web Share opens the native iOS Share Sheet,
-         * where the user can choose "Save Image".
-         */
+        
         try {
           if (
             navigator.share &&
@@ -521,9 +766,6 @@ export function PanchangamApp() {
           console.warn("iOS share failed. Using normal download.", error);
         }
 
-        /*
-         * Android / Desktop / browsers supporting download
-         */
         const url = URL.createObjectURL(blob);
 
         const link = document.createElement("a");
@@ -537,10 +779,6 @@ export function PanchangamApp() {
 
         document.body.removeChild(link);
 
-        /*
-         * Don't revoke immediately.
-         * Safari/Chrome iOS can need a little time to read the Blob URL.
-         */
         window.setTimeout(() => {
           URL.revokeObjectURL(url);
         }, 5000);
@@ -554,7 +792,7 @@ export function PanchangamApp() {
       "image/png",
       1,
     );
-  };
+  }; */
 
   return (
     <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
