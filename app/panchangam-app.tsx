@@ -211,10 +211,10 @@ export function PanchangamApp() {
     [cityId, coordinates, customPlace, date, language],
   );
 
-  useEffect(() => {
+  /* useEffect(() => {
     void loadPanchangam();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, []); */
 
   useEffect(() => {
     const modelContext = (

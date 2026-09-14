@@ -119,7 +119,9 @@ function dayPartTime(hour: number, minute: string, language: Language): string {
 
   let dayPart: string;
 
-  if (hour >= 5 && hour < 12) {
+  if (hour >= 3 && hour < 6) {
+    dayPart = language === "ta" ? "அதிகாலை" : "Early Morning";
+  } else if (hour >= 6 && hour < 12) {
     dayPart = language === "ta" ? "காலை" : "Morning";
   } else if (hour >= 12 && hour < 15) {
     dayPart = language === "ta" ? "மதியம்" : "Afternoon";
