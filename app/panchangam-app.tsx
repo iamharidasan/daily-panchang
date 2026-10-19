@@ -14,6 +14,7 @@ import {
   Sparkles,
   Sun,
 } from "lucide-react";
+import { FestivalPoster } from "@/components/festival-poster";
 import { Button } from "@/components/ui/button";
 
 type Language = "ta" | "en";
@@ -211,10 +212,10 @@ export function PanchangamApp() {
     [cityId, coordinates, customPlace, date, language],
   );
 
-  /* useEffect(() => {
-    void loadPanchangam();
+  useEffect(() => {
+    void loadPanchangam().catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); */
+  }, []);
 
   useEffect(() => {
     const modelContext = (
@@ -834,11 +835,11 @@ export function PanchangamApp() {
 
       <div className="mx-auto grid max-w-[1480px] gap-7 px-5 py-7 lg:grid-cols-[390px_minmax(0,1fr)] lg:px-9 lg:py-10">
         <section
-          className="h-fit rounded-[28px] border border-[#e6cfa8] bg-white p-5 shadow-[0_18px_60px_rgba(88,46,20,0.08)] lg:sticky lg:top-6 lg:p-6"
+          className="min-w-0 h-fit rounded-[28px] border border-[#e6cfa8] bg-white p-5 shadow-[0_18px_60px_rgba(88,46,20,0.08)] lg:sticky lg:top-6 lg:p-6"
           aria-labelledby="controls-heading"
         >
-          <div className="mb-6 flex items-start gap-3">
-            <div className="grid size-10 place-items-center rounded-xl bg-[#fff0d1] text-[#9b4a16]">
+          <div className="mb-6 flex items-start gap-3 [&>div]:min-w-0">
+            <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#fff0d1] text-[#9b4a16]">
               <CalendarDays />
             </div>
             <div>
@@ -889,6 +890,7 @@ export function PanchangamApp() {
                 type="button"
                 variant="ghost"
                 className="mt-2 w-full justify-start rounded-xl text-[#8a4517]"
+                style={{ whiteSpace: "normal", height: "auto", paddingBlock: 8 }}
                 onClick={useCurrentLocation}
               >
                 <LocateFixed className="size-4" />
@@ -1060,7 +1062,8 @@ export function PanchangamApp() {
           )}
         </section>
       </div>
-    </main>
+    <FestivalPoster data={data} language={language} loading={loading} />
+      </main>
   );
 }
 

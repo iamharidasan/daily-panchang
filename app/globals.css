@@ -76,3 +76,7 @@ button, input { font: inherit; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; }
 }
+
+@font-face { font-family: "Noto Sans Tamil"; font-style: normal; font-weight: 400; font-display: swap; src: url("/fonts/noto-sans-tamil-tamil-400-normal.woff2") format("woff2"); }
+
+@font-face { font-family: "Noto Sans Tamil"; font-style: normal; font-weight: 600; font-display: swap; src: url("/fonts/noto-sans-tamil-tamil-600-normal.woff2") format("woff2"); }
