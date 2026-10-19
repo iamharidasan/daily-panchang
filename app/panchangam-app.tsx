@@ -395,10 +395,14 @@ export function PanchangamApp() {
     const logo = await loadPosterImage("/cuddalore.png").catch(() => null);
 
     if (logo) {
-      ctx.drawImage(logo, 430, 50, 220, 220);
+      const logoSize = 170;
+      const logoX = (canvas.width - logoSize) / 2;
+
+      ctx.drawImage(logo, logoX, 62, logoSize, logoSize);
     } else {
       ctx.fillStyle = saffron;
-      drawCenteredFittedText("ௐ", 540, 180, 220, 84, 700, 60);
+
+      drawCenteredFittedText("ௐ", 540, 175, 170, 68, 700, 50);
     }
 
     /**
