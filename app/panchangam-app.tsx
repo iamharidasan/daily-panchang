@@ -305,17 +305,6 @@ export function PanchangamApp() {
     const fontFamily = "'Noto Sans Tamil', Latha, Arial";
 
     /**
-     * Draw normal centered text.
-     */
-    const drawCenteredText = (text: string, centerX: number, y: number) => {
-      ctx.textAlign = "left";
-      ctx.direction = "ltr";
-
-      const width = ctx.measureText(text).width;
-      ctx.fillText(text, centerX - width / 2, y);
-    };
-
-    /**
      * Draw centered text and automatically reduce the font size
      * when the text is wider than the available space.
      */
@@ -391,38 +380,82 @@ export function PanchangamApp() {
     ctx.lineWidth = 2;
     ctx.strokeRect(42, 42, 996, canvas.height - 84);
 
-    // Logo
-    const logo = await loadPosterImage("/cuddalore.png").catch(() => null);
+    // Top-left and top-right slogans
+    ctx.fillStyle = maroon;
+    ctx.font = `600 19px ${fontFamily}`;
+    ctx.direction = "ltr";
+
+    ctx.textAlign = "left";
+    ctx.fillText("அறம் காக்க...", 72, 82);
+
+    ctx.textAlign = "right";
+    ctx.fillText("அறம் நம்மை காக்கும்!", 1008, 82);
+
+    // Move the logo to the left
+    const logo = await loadPosterImage("/og-logo.png").catch(() => null);
+
+    const logoSize = 150;
+    const logoX = 92;
+    const logoY = 105;
 
     if (logo) {
-      const logoSize = 170;
-      const logoX = (canvas.width - logoSize) / 2;
-
-      ctx.drawImage(logo, logoX, 62, logoSize, logoSize);
+      ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
     } else {
       ctx.fillStyle = saffron;
-
-      drawCenteredFittedText("ௐ", 540, 175, 170, 68, 700, 50);
+      drawCenteredFittedText("ௐ", logoX + logoSize / 2, logoY + 105, logoSize, 64, 700, 48);
     }
+
+    // Organization name to the right of the logo
+    ctx.fillStyle = saffron;
+    drawFittedText("விசுவ ஹிந்து பரிஷத்", 265, 195, 720, 44, 700, 34);
+    // Restore the default alignment
+    ctx.textAlign = "left";
 
     /**
      * Header
      */
+    // Main Panchangam title
     ctx.fillStyle = maroon;
-    drawCenteredFittedText(t.title, 540, 320, 900, 52, 700, 38);
+    drawCenteredFittedText(
+      t.title,
+      540,
+      285, // Previously 320
+      900,
+      52,
+      700,
+      38,
+    );
 
+    // Date
     ctx.fillStyle = maroon;
-    drawCenteredFittedText(displayDate(data.date, language), 540, 370, 900, 34, 600, 26);
+    drawCenteredFittedText(
+      displayDate(data.date, language),
+      540,
+      335, // Previously 370
+      900,
+      34,
+      600,
+      26,
+    );
 
+    // Location
     ctx.fillStyle = muted;
-    drawCenteredFittedText(data.location, 540, 412, 900, 30, 500, 22);
+    drawCenteredFittedText(
+      data.location,
+      540,
+      377, // Previously 412
+      900,
+      30,
+      500,
+      22,
+    );
 
     // Header divider
     ctx.strokeStyle = border;
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(72, 436);
-    ctx.lineTo(1008, 436);
+    ctx.moveTo(72, 401);
+    ctx.lineTo(1008, 401);
     ctx.stroke();
 
     /**
@@ -439,18 +472,19 @@ export function PanchangamApp() {
       const x = 72 + index * 237;
       const centerX = x + 109.5;
 
+      // Inside solarItems.forEach()
       ctx.fillStyle = panel;
-      ctx.fillRect(x, 458, 219, 102);
+      ctx.fillRect(x, 423, 219, 102);
 
       ctx.strokeStyle = border;
       ctx.lineWidth = 1;
-      ctx.strokeRect(x, 458, 219, 102);
+      ctx.strokeRect(x, 423, 219, 102);
 
       ctx.fillStyle = saffron;
-      drawCenteredFittedText(label, centerX, 493, 195, 22, 600, 17);
+      drawCenteredFittedText(label, centerX, 458, 195, 22, 600, 17);
 
       ctx.fillStyle = maroon;
-      drawCenteredFittedText(value, centerX, 536, 195, 31, 700, 22);
+      drawCenteredFittedText(value, centerX, 501, 195, 31, 700, 22);
     });
 
     /**
@@ -535,8 +569,8 @@ export function PanchangamApp() {
     const rightX = 552;
     const columnWidth = 456;
 
-    let leftY = 586;
-    let rightY = 586;
+    let leftY = 551;
+    let rightY = 551;
 
     leftY = drawSection(leftX, leftY, columnWidth, t.tithi, data.tithi);
 
@@ -554,27 +588,25 @@ export function PanchangamApp() {
 
     drawSection(rightX, rightY, columnWidth, t.inauspicious, data.inauspiciousPeriods);
 
-    /**
-     * Footer separator
-     */
+    // Footer separator
     ctx.strokeStyle = border;
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(200, 1735);
-    ctx.lineTo(880, 1735);
+    ctx.moveTo(200, 1695);
+    ctx.lineTo(880, 1695);
     ctx.stroke();
 
-    /**
-     * Footer
-     */
+    // Footer name
     ctx.fillStyle = saffron;
-    drawCenteredFittedText("சண்முக ஹரிதாசன்", 540, 1780, 900, 30, 600, 24);
+    drawCenteredFittedText("சண்முக ஹரிதாசன்", 540, 1740, 900, 30, 600, 24);
 
+    // Footer designation
     ctx.fillStyle = blue;
-    drawCenteredFittedText("கடலூர் மாவட்ட செயலாளர், விசுவ ஹிந்து பரிஷத்", 540, 1820, 900, 24, 600, 18);
+    drawCenteredFittedText("கடலூர் மாவட்ட செயலாளர், விசுவ ஹிந்து பரிஷத்", 540, 1780, 900, 24, 600, 18);
 
+    // Footer message
     ctx.fillStyle = saffron;
-    drawCenteredFittedText(`• ${t.footer} •`, 540, 1870, 900, 31, 600, 22);
+    drawCenteredFittedText(`• ${t.footer} •`, 540, 1830, 900, 31, 600, 22);
 
     /**
      * iPhone/Safari-compatible image saving
